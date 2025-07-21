@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reporte de Llamada</title>
-
-  <!-- manifest PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#005131"/>
 
@@ -28,23 +26,17 @@
     <label for="hora">HORA:</label>
     <input type="text" id="hora" inputmode="numeric" placeholder="HH:MM:SS" />
 
-    <label for="duracion">DURACIÓN (sec):</label>
-    <input type="text" id="duracion" inputmode="numeric" placeholder="Ej: 12" />
+    <label for="duracion">DURACIÓN:</label>
+    <input type="text" id="duracion" inputmode="numeric" placeholder="HH:MM:SS" />
 
-    <label for="relato">RELATO:</label>
-    <textarea id="relato" rows="4" placeholder="Escribe aquí el relato completo..."></textarea>
-
-    <button id="generate">Generar Reporte</button>
-    <button id="share" hidden>Compartir por WhatsApp</button>
-
-    <pre id="report"></pre>
+    <button id="generate">Enviar por WhatsApp</button>
   </div>
 
   <script>
-    // registrar Service Worker
+    // registrar Service Worker (igual que antes)
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
-        .catch(err => console.warn('SW registration falló:', err));
+        .catch(err => console.warn('SW falló:', err));
     }
   </script>
 </body>
