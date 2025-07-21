@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporte de Llamada</title>
+
+  <!-- manifest PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#005131"/>
+
+  <link rel="stylesheet" href="style.css" />
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Reporte de Llamada</h1>
+
+    <label for="caso">CASO:</label>
+    <input type="text" id="caso" placeholder="Ej: PROFUGO ROBO CON HOMICIDIO ÑUÑOA NRO.04" />
+
+    <label for="numero">NRO.:</label>
+    <input type="text" id="numero" placeholder="Ej: 92014663" />
+
+    <label for="llamada">LLAMADA:</label>
+    <input type="text" id="llamada" placeholder="Ej: NRO. 08" />
+
+    <label for="hora">HORA:</label>
+    <input type="text" id="hora" inputmode="numeric" placeholder="HH:MM:SS" />
+
+    <label for="duracion">DURACIÓN (sec):</label>
+    <input type="text" id="duracion" inputmode="numeric" placeholder="Ej: 12" />
+
+    <label for="relato">RELATO:</label>
+    <textarea id="relato" rows="4" placeholder="Escribe aquí el relato completo..."></textarea>
+
+    <button id="generate">Generar Reporte</button>
+    <button id="share" hidden>Compartir por WhatsApp</button>
+
+    <pre id="report"></pre>
+  </div>
+
+  <script>
+    // registrar Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .catch(err => console.warn('SW registration falló:', err));
+    }
+  </script>
+</body>
+</html>
