@@ -4,18 +4,56 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reporte de Llamada</title>
+
+  <!-- PWA manifest -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#005131"/>
 
-  <link rel="stylesheet" href="style.css" />
-  <script src="app.js" defer></script>
+  <!-- Estilos -->
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      margin: 0; padding: 1rem;
+    }
+    .container {
+      max-width: 500px;
+      background: white;
+      margin: auto;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    h1 { text-align: center; margin-bottom: 1rem; }
+    label { display: block; margin: .5rem 0 .2rem; font-weight: bold; }
+    input, textarea {
+      width: 100%; padding: .5rem; margin-bottom: .75rem;
+      border: 1px solid #ccc; border-radius: 4px;
+    }
+    button {
+      width: 100%; padding: .75rem; border: none;
+      border-radius: 4px; background: #005131;
+      color: white; font-size: 1rem; cursor: pointer;
+    }
+    button:hover { opacity: .9; }
+  </style>
+
+  <!-- Registrar Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('service-worker.js')
+        .catch(err => console.warn('SW falló:', err));
+    }
+  </script>
 </head>
 <body>
   <div class="container">
     <h1>Reporte de Llamada</h1>
 
     <label for="caso">CASO:</label>
-    <input type="text" id="caso" placeholder="Ej: PROFUGO ROBO CON HOMICIDIO ÑUÑOA NRO.04" />
+    <input type="text" id="caso" placeholder="Ej: PROFUGO ROBO… ÑUÑOA NRO.04" />
 
     <label for="numero">NRO.:</label>
     <input type="text" id="numero" placeholder="Ej: 92014663" />
@@ -27,20 +65,84 @@
     <input type="text" id="hora" inputmode="numeric" placeholder="HH:MM:SS" />
 
     <label for="duracion">DURACIÓN:</label>
-    <input type="text" id="duracion" inputmode="numeric" placeholder="HH:MM:SS" />
+    <input type="text" id="duracion" inputmode="numeric" placeholder="HH:MM'SS&quot;" />
 
     <label for="relato">RELATO:</label>
-    <textarea id="relato" rows="4" placeholder="Escribe el relato..."></textarea>
+    <textarea id="relato" rows="4" placeholder="Escribe el relato de los hechos…"></textarea>
 
     <button id="generate">Enviar por WhatsApp</button>
   </div>
 
+  <!-- Lógica JS -->
   <script>
-    // registrar Service Worker (igual que antes)
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .catch(err => console.warn('SW falló:', err));
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const campoHora = document.getElementById('hora');
+      const campoDur  = document.getElementById('duracion');
+      const btnGen    = document.getElementById('generate');
+
+      // MÁSCARA HH:MM:SS
+      function maskTime(e) {
+        let v = e.target.value.replace(/\D/g, '').slice(0,6);
+        if (v.length <= 2) {
+          e.target.value = v;
+        } else if (v.length <= 4) {
+          e.target.value = v.slice(0,2) + ':' + v.slice(2);
+        } else {
+          e.target.value =
+            v.slice(0,2) + ':' +
+            v.slice(2,4) + ':' +
+            v.slice(4);
+        }
+      }
+
+      // MÁSCARA HH:MM'SS"
+      function maskDur(e) {
+        let v = e.target.value.replace(/\D/g, '').slice(0,6);
+        if (v.length <= 2) {
+          // solo horas (o minutos si es <60)
+          e.target.value = v;
+        } else if (v.length <= 4) {
+          // horas : minutos'
+          const hh = v.slice(0, v.length-2);
+          const mm = v.slice(-2);
+          e.target.value = hh + ':' + mm + "'";
+        } else {
+          // horas : minutos ' segundos "
+          const hh = v.slice(0, v.length-4);
+          const mm = v.slice(v.length-4, v.length-2);
+          const ss = v.slice(-2);
+          e.target.value = hh + ':' + mm + "'" + ss + '"';
+        }
+      }
+
+      campoHora.addEventListener('input', maskTime);
+      campoDur.addEventListener('input', maskDur);
+
+      btnGen.addEventListener('click', () => {
+        const caso   = document.getElementById('caso').value.trim();
+        const nro    = document.getElementById('numero').value.trim();
+        const llamada= document.getElementById('llamada').value.trim();
+        const hora   = campoHora.value.trim();
+        const dur    = campoDur.value.trim();
+        const relato = document.getElementById('relato').value.trim();
+
+        if (!caso||!nro||!llamada||!hora||!dur||!relato) {
+          return alert('Completa todos los campos, porfa.');
+        }
+
+        const texto =
+`CASO: ${caso}
+NRO.: ${nro}
+LLAMADA: ${llamada}
+HORA: ${hora} hrs
+DURACIÓN: ${dur}
+RELATO:
+${relato}`;
+
+        const mensaje = encodeURIComponent(texto);
+        window.open(`https://api.whatsapp.com/send?text=${mensaje}`, '_blank');
+      });
+    });
   </script>
 </body>
 </html>
